@@ -1,27 +1,35 @@
 // Project State Management
 class ProjectState {
-    private projects: any[] = [];
-    private static instance: ProjectState;
+  private listeners: any[] = [];
+  private projects: any[] = [];
+  private static instance: ProjectState;
 
-    private constructor() {}
+  private constructor() {}
 
-    static getInstance() {
-        if(ProjectState.instance) {
-            return this.instance;
-        }
-        this.instance = new ProjectState();
-        return this.instance;
+  static getInstance() {
+    if (ProjectState.instance) {
+      return this.instance;
     }
+    this.instance = new ProjectState();
+    return this.instance;
+  }
 
-    public addProject(title: string, description: string, people: number) {
-        const newProject = {
-            id: Math.random().toString(),
-            title: title,
-            description: description,
-            people: people
-        }
-        this.projects.push(newProject);
+  public addListener(listenerFn: Function) {
+    this.listeners.push(listenerFn);
+  }
+
+  public addProject(title: string, description: string, people: number) {
+    const newProject = {
+      id: Math.random().toString(),
+      title: title,
+      description: description,
+      people: people,
+    };
+    this.projects.push(newProject);
+    for (const listenersFn of this.listeners) {
+      listenersFn(this.projects.slice());
     }
+  }
 }
 
 const projectState = ProjectState.getInstance();
@@ -85,37 +93,56 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
 
 // ProjectList Class
 class ProjectList {
-    private templateElement: HTMLTemplateElement;
-    private hostElement: HTMLDivElement;
-    private listElement: HTMLElement
+  private templateElement: HTMLTemplateElement;
+  private hostElement: HTMLDivElement;
+  private listElement: HTMLElement;
+  assignedProjects: any[];
 
-    constructor(private type: 'active' | 'finished') {
-        // get form and app elements
+  constructor(private type: "active" | "finished") {
+    // get form and app elements
     this.templateElement = document.getElementById(
-        'project-list'
-      )! as HTMLTemplateElement;
-      this.hostElement = document.getElementById("app")! as HTMLDivElement;
-  
-      // import formElement to a node
-      const importedNode = document.importNode(
-        this.templateElement.content,
-        true
-      );
-      this.listElement = importedNode.firstElementChild as HTMLElement;
-      this.listElement.id = `${type}-projects`;
-      this.attach();
-      this.renderContent();
-    }
+      "project-list"
+    )! as HTMLTemplateElement;
+    this.hostElement = document.getElementById("app")! as HTMLDivElement;
+    this.assignedProjects = [];
 
-    private attach() {
-        this.hostElement.insertAdjacentElement('beforeend', this.listElement);
-    }
+    // import formElement to a node
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    );
+    this.listElement = importedNode.firstElementChild as HTMLElement;
+    this.listElement.id = `${type}-projects`;
 
-    private renderContent() {
-        const listId = `${this.type}-projects-list`;
-        this.listElement.querySelector('h2')!.textContent = `${this.type.toUpperCase()} projects`;
-        this.listElement.querySelector('ul')!.id = listId;
+    projectState.addListener((projects: any[]) => {
+        this.assignedProjects = projects;
+        this.renderProjects();
+    })
+
+    this.attach();
+    this.renderContent();
+  }
+
+  private renderProjects() {
+    const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+    for (const prjItem of this.assignedProjects) {
+        const listItem = document.createElement('li');
+        listItem.textContent = prjItem.title;
+        listEl.appendChild(listItem);
     }
+  }
+
+  private renderContent() {
+    const listId = `${this.type}-projects-list`;
+    this.listElement.querySelector(
+      "h2"
+    )!.textContent = `${this.type.toUpperCase()} projects`;
+    this.listElement.querySelector("ul")!.id = listId;
+  }
+
+  private attach() {
+    this.hostElement.insertAdjacentElement("beforeend", this.listElement);
+  }
 }
 
 // ProjectInput class
@@ -165,18 +192,18 @@ class ProjectInput {
     const titleValidatable: Validatable = {
       value: enteredTitle,
       required: true,
-      minLenght: 5
+      minLenght: 5,
     };
     const descriptionValidatable: Validatable = {
       value: enteredDescription,
       required: true,
-      minLenght: 5
+      minLenght: 5,
     };
     const peopleValidatable: Validatable = {
       value: +enteredPeople,
       required: true,
       min: 1,
-      max: 5
+      max: 5,
     };
     if (
       !validate(titleValidatable) ||
@@ -202,7 +229,7 @@ class ProjectInput {
     const userInput = this.gatherUserInput();
     if (Array.isArray(userInput)) {
       const [title, desc, people] = userInput;
-      console.log(title, desc, people);
+      projectState.addProject(title, desc, people);
       this.clearInputs();
     }
   }
@@ -217,5 +244,5 @@ class ProjectInput {
 }
 
 const prjInput = new ProjectInput();
-const activePrjList = new ProjectList('active');
-const finishedPrjList = new ProjectList('finished');
+const activePrjList = new ProjectList("active");
+const finishedPrjList = new ProjectList("finished");
