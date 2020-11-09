@@ -1,7 +1,25 @@
+// Project Type
+enum ProjectStatus {
+  Active,
+  Finished,
+}
+
+class Project {
+  constructor(
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
+  ) {}
+}
+
+type Listener = (items: Project[]) => void;
+
 // Project State Management
 class ProjectState {
-  private listeners: any[] = [];
-  private projects: any[] = [];
+  private listeners: Listener[] = [];
+  private projects: Project[] = [];
   private static instance: ProjectState;
 
   private constructor() {}
@@ -14,17 +32,18 @@ class ProjectState {
     return this.instance;
   }
 
-  public addListener(listenerFn: Function) {
+  public addListener(listenerFn: Listener) {
     this.listeners.push(listenerFn);
   }
 
   public addProject(title: string, description: string, people: number) {
-    const newProject = {
-      id: Math.random().toString(),
-      title: title,
-      description: description,
-      people: people,
-    };
+    const newProject = new Project(
+      Math.random().toString(),
+      title,
+      description,
+      people,
+      ProjectStatus.Active
+    );
     this.projects.push(newProject);
     for (const listenersFn of this.listeners) {
       listenersFn(this.projects.slice());
@@ -96,7 +115,7 @@ class ProjectList {
   private templateElement: HTMLTemplateElement;
   private hostElement: HTMLDivElement;
   private listElement: HTMLElement;
-  assignedProjects: any[];
+  assignedProjects: Project[];
 
   constructor(private type: "active" | "finished") {
     // get form and app elements
@@ -114,21 +133,31 @@ class ProjectList {
     this.listElement = importedNode.firstElementChild as HTMLElement;
     this.listElement.id = `${type}-projects`;
 
-    projectState.addListener((projects: any[]) => {
-        this.assignedProjects = projects;
-        this.renderProjects();
-    })
+    projectState.addListener((projects: Project[]) => {
+      const relevantProject = projects.filter((prj) => {
+          if (this.type === 'active') {
+            return prj.status === ProjectStatus.Active
+          }
+          return prj.status === ProjectStatus.Finished
+      });
+      this.assignedProjects = relevantProject;
+      this.renderProjects();
+    });
 
     this.attach();
     this.renderContent();
   }
 
   private renderProjects() {
-    const listEl = document.getElementById(`${this.type}-projects-list`)! as HTMLUListElement;
+    const listEl = document.getElementById(
+      `${this.type}-projects-list`
+    )! as HTMLUListElement;
+    // reinitialize before put list
+    listEl.innerHTML = '';
     for (const prjItem of this.assignedProjects) {
-        const listItem = document.createElement('li');
-        listItem.textContent = prjItem.title;
-        listEl.appendChild(listItem);
+      const listItem = document.createElement("li");
+      listItem.textContent = prjItem.title;
+      listEl.appendChild(listItem);
     }
   }
 
