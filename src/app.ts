@@ -55,6 +55,41 @@ function Autobind(_: any, _2: string, descriptor: PropertyDescriptor) {
   return adjDescriptor;
 }
 
+// ProjectList Class
+class ProjectList {
+    private templateElement: HTMLTemplateElement;
+    private hostElement: HTMLDivElement;
+    private listElement: HTMLElement
+
+    constructor(private type: 'active' | 'finished') {
+        // get form and app elements
+    this.templateElement = document.getElementById(
+        'project-list'
+      )! as HTMLTemplateElement;
+      this.hostElement = document.getElementById("app")! as HTMLDivElement;
+  
+      // import formElement to a node
+      const importedNode = document.importNode(
+        this.templateElement.content,
+        true
+      );
+      this.listElement = importedNode.firstElementChild as HTMLElement;
+      this.listElement.id = `${type}-projects`;
+      this.attach();
+      this.renderContent();
+    }
+
+    private attach() {
+        this.hostElement.insertAdjacentElement('beforeend', this.listElement);
+    }
+
+    private renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.listElement.querySelector('h2')!.textContent = `${this.type} projects`;
+        this.listElement.querySelector('ul')!.id = listId;
+    }
+}
+
 // ProjectInput class
 class ProjectInput {
   private templateElement: HTMLTemplateElement;

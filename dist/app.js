@@ -42,6 +42,29 @@ function Autobind(_, _2, descriptor) {
     };
     return adjDescriptor;
 }
+// ProjectList Class
+class ProjectList {
+    constructor(type) {
+        this.type = type;
+        // get form and app elements
+        this.templateElement = document.getElementById('project-list');
+        this.hostElement = document.getElementById("app");
+        // import formElement to a node
+        const importedNode = document.importNode(this.templateElement.content, true);
+        this.listElement = importedNode.firstElementChild;
+        this.listElement.id = `${type}-projects`;
+        this.attach();
+        this.renderContent();
+    }
+    attach() {
+        this.hostElement.insertAdjacentElement('beforeend', this.listElement);
+    }
+    renderContent() {
+        const listId = `${this.type}-projects-list`;
+        this.listElement.querySelector('h2').textContent = `${this.type} projects`;
+        this.listElement.querySelector('ul').id = listId;
+    }
+}
 // ProjectInput class
 class ProjectInput {
     constructor() {
