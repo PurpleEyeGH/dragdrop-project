@@ -5,6 +5,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+// Project State Management
+class ProjectState {
+    constructor() {
+        this.projects = [];
+    }
+    static getInstance() {
+        if (ProjectState.instance) {
+            return this.instance;
+        }
+        this.instance = new ProjectState();
+        return this.instance;
+    }
+    addProject(title, description, people) {
+        const newProject = {
+            id: Math.random().toString(),
+            title: title,
+            description: description,
+            people: people
+        };
+        this.projects.push(newProject);
+    }
+}
+const projectState = ProjectState.getInstance();
 function validate(validatableInput) {
     let isValid = true;
     if (validatableInput.required) {
@@ -61,7 +84,7 @@ class ProjectList {
     }
     renderContent() {
         const listId = `${this.type}-projects-list`;
-        this.listElement.querySelector('h2').textContent = `${this.type} projects`;
+        this.listElement.querySelector('h2').textContent = `${this.type.toUpperCase()} projects`;
         this.listElement.querySelector('ul').id = listId;
     }
 }
@@ -136,3 +159,5 @@ __decorate([
     Autobind
 ], ProjectInput.prototype, "submitHandler", null);
 const prjInput = new ProjectInput();
+const activePrjList = new ProjectList('active');
+const finishedPrjList = new ProjectList('finished');

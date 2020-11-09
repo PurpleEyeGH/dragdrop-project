@@ -1,3 +1,31 @@
+// Project State Management
+class ProjectState {
+    private projects: any[] = [];
+    private static instance: ProjectState;
+
+    private constructor() {}
+
+    static getInstance() {
+        if(ProjectState.instance) {
+            return this.instance;
+        }
+        this.instance = new ProjectState();
+        return this.instance;
+    }
+
+    public addProject(title: string, description: string, people: number) {
+        const newProject = {
+            id: Math.random().toString(),
+            title: title,
+            description: description,
+            people: people
+        }
+        this.projects.push(newProject);
+    }
+}
+
+const projectState = ProjectState.getInstance();
+
 // Validation
 interface Validatable {
   value: string | number;
@@ -85,7 +113,7 @@ class ProjectList {
 
     private renderContent() {
         const listId = `${this.type}-projects-list`;
-        this.listElement.querySelector('h2')!.textContent = `${this.type} projects`;
+        this.listElement.querySelector('h2')!.textContent = `${this.type.toUpperCase()} projects`;
         this.listElement.querySelector('ul')!.id = listId;
     }
 }
@@ -189,3 +217,5 @@ class ProjectInput {
 }
 
 const prjInput = new ProjectInput();
+const activePrjList = new ProjectList('active');
+const finishedPrjList = new ProjectList('finished');
