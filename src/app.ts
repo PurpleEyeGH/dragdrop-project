@@ -1,43 +1,72 @@
+// autobind decorateur
+function Autobind(
+  target: any,
+  methodName: string,
+  descriptor: PropertyDescriptor
+) {
+    const originalMethod = descriptor.value;
+    const adjDescriptor: PropertyDescriptor = {
+        configurable: true,
+        get() {
+            const boundFn = originalMethod.bind(this);
+            return boundFn;
+        }
+    };
+    return adjDescriptor;
+}
+
+// ProjectInput class
 class ProjectInput {
+  private templateElement: HTMLTemplateElement;
+  private hostElement: HTMLDivElement;
+  private formElement: HTMLFormElement;
 
-    private templateElement: HTMLTemplateElement;
-    private hostElement: HTMLDivElement;
-    private formElement: HTMLFormElement;
+  private titleInputElement: HTMLInputElement;
+  private descriptionInputElement: HTMLInputElement;
+  private peopleInputElement: HTMLInputElement;
 
-    private titleInputElement: HTMLInputElement;
-    private descriptionInputElement: HTMLInputElement;
-    private peopleInputElement: HTMLInputElement;
+  constructor() {
+    // get form and app elements
+    this.templateElement = document.getElementById(
+      "project-input"
+    )! as HTMLTemplateElement;
+    this.hostElement = document.getElementById("app")! as HTMLDivElement;
 
-    constructor() {
-        // get form and app elements
-        this.templateElement = document.getElementById('project-input')! as HTMLTemplateElement;
-        this.hostElement = document.getElementById('app')! as HTMLDivElement;
-        
-        // import formElement to a node
-        const importedNode = document.importNode(this.templateElement.content, true);
-        this.formElement = importedNode.firstElementChild as HTMLFormElement;
-        this.formElement.id = 'form-project'
+    // import formElement to a node
+    const importedNode = document.importNode(
+      this.templateElement.content,
+      true
+    );
+    this.formElement = importedNode.firstElementChild as HTMLFormElement;
+    this.formElement.id = "form-project";
 
-        this.titleInputElement = this.formElement.querySelector('#title') as HTMLInputElement;
-        this.descriptionInputElement = this.formElement.querySelector('#description') as HTMLInputElement;
-        this.peopleInputElement = this.formElement.querySelector('#people') as HTMLInputElement;
+    this.titleInputElement = this.formElement.querySelector(
+      "#title"
+    ) as HTMLInputElement;
+    this.descriptionInputElement = this.formElement.querySelector(
+      "#description"
+    ) as HTMLInputElement;
+    this.peopleInputElement = this.formElement.querySelector(
+      "#people"
+    ) as HTMLInputElement;
 
-        this.configure();
-        this.attach();
-    }
+    this.configure();
+    this.attach();
+  }
 
-    private submitHandler(event: Event) {
-        event.preventDefault();
-        console.log(this.titleInputElement.value);
-    }
+  @Autobind
+  private submitHandler(event: Event) {
+    event.preventDefault();
+    console.log(this.titleInputElement.value);
+  }
 
-    private configure() {
-        this.formElement.addEventListener('submit', this.submitHandler.bind(this));
-    }
+  private configure() {
+    this.formElement.addEventListener("submit", this.submitHandler);
+  }
 
-    private attach() {
-        this.hostElement.insertAdjacentElement('afterbegin', this.formElement);
-    }
+  private attach() {
+    this.hostElement.insertAdjacentElement("afterbegin", this.formElement);
+  }
 }
 
 const prjInput = new ProjectInput();
