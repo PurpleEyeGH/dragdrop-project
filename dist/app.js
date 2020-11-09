@@ -6,14 +6,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 // autobind decorateur
-function Autobind(target, methodName, descriptor) {
+function Autobind(_, _2, descriptor) {
     const originalMethod = descriptor.value;
     const adjDescriptor = {
         configurable: true,
         get() {
             const boundFn = originalMethod.bind(this);
             return boundFn;
-        }
+        },
     };
     return adjDescriptor;
 }
