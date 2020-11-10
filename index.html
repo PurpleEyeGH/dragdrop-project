@@ -13,12 +13,17 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css"
     />
+    <style type="text/css">
+      .droppable {
+        background: blue;
+      }
+    </style>
   </head>
   <body>
     <section class="section">
       <div class="container">
         <h1 class="title">Hello World</h1>
-        <p class="subtitle">My first website with <strong>Bulma</strong>!</p>
+        <p class="subtitle">Drag&Drop only with <strong>TypeScript</strong>!</p>
         <div id="app"></div>
         <template id="project-input">
           <form>
@@ -62,7 +67,7 @@
           </form>
         </template>
         <template id="single-project">
-          <div class="box">
+          <div class="box" draggable="true">
             <li>
               <h2></h2>
               <h3></h3>
